@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTOSmart POS</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="pos-app">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-wrapper">
+                    <i class="fa-solid fa-store logo-icon"></i>
+                </div>
+                <h2>RTOSmart POS</h2>
+            </div>
+            <ul class="nav-links">
+                <li data-tab="register" class="active"><i class="fa-solid fa-cash-register"></i> Register</li>
+                <li data-tab="orders"><i class="fa-solid fa-list-ul"></i> Orders</li>
+                <li data-tab="inventory"><i class="fa-solid fa-boxes-stacked"></i> Inventory</li>
+                <li data-tab="purchasing"><i class="fa-solid fa-cart-shopping"></i> Purchasing & Receiving</li>
+                <li data-tab="work-orders"><i class="fa-solid fa-screwdriver-wrench"></i> Work Orders</li>
+                <li data-tab="customers"><i class="fa-solid fa-users"></i> Customers</li>
+                <li data-tab="website"><i class="fa-solid fa-globe"></i> Website</li>
+                <li data-tab="reports"><i class="fa-solid fa-chart-line"></i> Reports</li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <img src="https://ui-avatars.com/api/?name=Bilal+Aleem&background=6c5ce7&color=fff"
+                        alt="User Avatar">
+                    <div class="user-details">
+                        <span class="user-name">Bilal Aleem</span>
+                        <span class="user-role">Clerk / Admin</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="globalSearch" placeholder="Search by First/Last Name, Email or Phone...">
+                </div>
+
+                <div class="topbar-right">
+                    <div class="location-selector" id="locationSelector">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <select id="store-location" class="location-dropdown">
+                            <option value="loading">Loading Locations...</option>
+                        </select>
+                        <button class="icon-btn-small tooltip-target" id="add-location-btn" aria-label="Add Location"><i
+                                class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <div class="topbar-actions">
+                        <button class="icon-btn tooltip-target" aria-label="Notifications"><i
+                                class="fa-regular fa-bell"></i></button>
+                        <button class="icon-btn tooltip-target" aria-label="Settings"><i
+                                class="fa-solid fa-gear"></i></button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Loading Overlay -->
+            <div id="app-loading" class="fullscreen-loading">
+                <div class="spinner-wrapper"><i class="fa-solid fa-cube fa-beat-fade"></i></div>
+                <h3 style="margin-top: 20px;">Initializing RTOSmart POS...</h3>
+            </div>
+
+            <!-- TAB: Register -->
+            <div class="tab-content" id="register-tab">
+                <div class="register-layout">
+                    <!-- Left: Products -->
+                    <div class="products-section">
+                        <!-- Sub Search for Products -->
+                        <div class="product-search-wrapper">
+                            <div class="product-search">
+                                <i class="fa-solid fa-barcode"></i>
+                                <input type="text" placeholder="Product Title, SKU, UPC, ID, Alternative IDs...">
+                            </div>
+                        </div>
+
+                        <!-- Categories -->
+                        <div class="categories-bar" id="categories-container">
+                            <button class="category-chip active">All</button>
+                            <button class="category-chip">Electronics</button>
+                            <button class="category-chip">Furniture</button>
+                            <button class="category-chip">Accessories</button>
+                        </div>
+
+                        <!-- Product Grid -->
+                        <div class="products-grid" id="products-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Cart Sidebar -->
+                    <div class="cart-sidebar">
+                        <div class="cart-info">
+                            <div class="info-row"><span class="info-label">Date</span> <span class="info-value"
+                                    id="current-date">--</span></div>
+                            <div class="info-row"><span class="info-label">Clerk</span> <span
+                                    class="info-value truncate-text"
+                                    title="bilal.aleem2406@gmail.com">bilal.aleem2406...</span></div>
+                            <div class="info-row"><span class="info-label">Sales Rep</span> <span
+                                    class="info-value">bilal aleem</span></div>
+                            <div class="info-row"><span class="info-label">Location</span> <span class="info-value"
+                                    id="cart-location-display">--</span></div>
+                            <div class="info-row"><span class="info-label">Till</span> <span
+                                    class="info-value status-open">RTO Mattress (Open)</span></div>
+                        </div>
+
+                        <div class="cart-items" id="cart-items">
+                            <div class="empty-cart-message">
+                                <div class="empty-icon-circle">
+                                    <i class="fa-solid fa-cart-arrow-down"></i>
+                                </div>
+                                <p>No items in cart</p>
+                                <span>Scan or click products to add</span>
+                            </div>
+                        </div>
+
+                        <div class="cart-summary">
+                            <div class="summary-row"><span class="summary-label">Subtotal</span> <span
+                                    class="summary-value" id="subtotal">$0.00</span></div>
+                            <div class="summary-row"><span class="summary-label">Discount</span> <span
+                                    class="summary-value" id="discount">$0.00</span></div>
+                            <div class="summary-row"><span class="summary-label">Tax (Add)</span> <span
+                                    class="summary-value" id="tax">$0.00</span></div>
+                            <div class="summary-row"><span class="summary-label">Shipping</span> <span
+                                    class="summary-value" id="shipping">$0.00</span></div>
+                            <div class="summary-row shipping-discount-row">
+                                <span class="summary-label">Shipping Discount</span> <span class="summary-value"
+                                    id="shipping-discount">$0.00</span>
+                            </div>
+                            <div class="summary-row total-row"><span class="summary-label">Total</span> <span
+                                    class="summary-value total-amt" id="total">$0.00</span></div>
+                            <div class="summary-row due-row"><span class="summary-label">Due</span> <span
+                                    class="summary-value due-amt" id="due">$0.00</span></div>
+                        </div>
+
+                        <div class="cart-actions">
+                            <div class="quick-customer-input" style="margin-bottom: 15px;">
+                                <input type="text" id="cart-customer-name" placeholder="Customer Name (Optional)"
+                                    class="form-control"
+                                    style="font-size:0.85rem; padding: 8px 12px; margin-bottom: 6px;">
+                                <input type="text" id="cart-customer-contact" placeholder="Email/Phone"
+                                    class="form-control" style="font-size:0.85rem; padding: 8px 12px;">
+                            </div>
+                            <div class="action-grid">
+                                <button class="btn btn-emerald" id="btn-cash"><i
+                                        class="fa-solid fa-money-bill-1-wave"></i> Cash</button>
+                                <button class="btn btn-blue" id="btn-card"><i class="fa-solid fa-credit-card"></i>
+                                    Card</button>
+                                <button class="btn btn-outline" id="btn-other"><i class="fa-solid fa-ellipsis"></i>
+                                    Other</button>
+                                <button class="btn btn-outline" id="btn-resume"><i class="fa-solid fa-pause"></i>
+                                    Resume</button>
+                            </div>
+                            <button class="btn btn-primary btn-full shadow-glow" id="btn-complete">Complete Order <i
+                                    class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Orders -->
+            <div class="tab-content hidden" id="orders-tab">
+                <div class="page-header">
+                    <h2>Orders & Transactions</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-outline"><i class="fa-solid fa-download"></i> Download CSV</button>
+                    </div>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>Search</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" placeholder="Filter by Name, Phone...">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Date Range</label>
+                        <div class="input-with-icon">
+                            <i class="fa-regular fa-calendar"></i>
+                            <input type="text" placeholder="Jan 26 - Feb 25" readonly
+                                value="Jan 26, 2026 - Feb 25, 2026">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select>
+                            <option>Action Needed</option>
+                            <option>Completed</option>
+                            <option>All</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Channel</label>
+                        <select>
+                            <option>All</option>
+                            <option>In-Store</option>
+                            <option>Online</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Shipping Method</label>
+                        <select>
+                            <option>All</option>
+                            <option>Delivery</option>
+                            <option>Pickup</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Pickup Location</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <select id="orders-location-filter">
+                                <option value="all">All Locations</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container fade-in">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Processor</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <!-- Empty State initially -->
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <div class="empty-icon-wrapper">
+                                        <i class="fa-regular fa-folder-open"></i>
+                                    </div>
+                                    <p>No orders found.</p>
+                                    <span class="empty-sub">Try changing your filters or date range.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Inventory -->
+            <div class="tab-content hidden" id="inventory-tab">
+                <div class="page-header">
+                    <h2>Inventory Management</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary shadow-glow" id="open-add-product"><i
+                                class="fa-solid fa-plus"></i> Add Product</button>
+                    </div>
+                </div>
+                <div class="table-container fade-in">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Work Orders -->
+            <div class="tab-content hidden" id="work-orders-tab">
+                <div class="page-header">
+                    <h2>Work Orders</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" id="open-add-wo"><i class="fa-solid fa-plus"></i> New Work
+                            Order</button>
+                    </div>
+                </div>
+
+                <div class="table-container fade-in">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>WO #</th>
+                                <th>Customer</th>
+                                <th>Received</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Item (Make/Model)</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="work-orders-table-body">
+                            <!-- work orders injected dynamically -->
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <div class="empty-icon-wrapper"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                                    <p>No Work Orders Found</p>
+                                    <span class="empty-sub">Create a new work order to begin tracking
+                                        repairs/customizations.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Customers -->
+            <div class="tab-content hidden" id="customers-tab">
+                <div class="page-header">
+                    <h2>Customer Database</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-primary shadow-glow" id="open-add-customer"><i
+                                class="fa-solid fa-user-plus"></i> Add Customer</button>
+                    </div>
+                </div>
+                <div class="table-container fade-in">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Group</th>
+                                <th>Total Spent</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: Purchasing -->
+            <div class="tab-content hidden" id="purchasing-tab" style="padding: 40px; overflow-y:auto;">
+
+                <div class="purchasing-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- Left: Vendors -->
+                    <div class="vendor-section">
+                        <div class="page-header" style="margin-bottom: 20px;">
+                            <h2 style="font-size: 1.5rem;">Vendors</h2>
+                            <button class="btn btn-outline" id="open-add-vendor"><i class="fa-solid fa-truck"></i> Add
+                                Vendor</button>
+                        </div>
+                        <div class="table-container fade-in">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Contact</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vendors-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Purchase Orders -->
+                    <div class="po-section">
+                        <div class="page-header" style="margin-bottom: 20px;">
+                            <h2 style="font-size: 1.5rem;">Purchase Orders</h2>
+                            <button class="btn btn-primary shadow-glow" id="open-add-po"><i
+                                    class="fa-solid fa-file-invoice"></i> Create PO</button>
+                        </div>
+                        <div class="table-container fade-in">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Vendor</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="purchasing-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Reports Dashboard -->
+            <div class="tab-content hidden" id="reports-tab">
+                <div class="page-header">
+                    <h2>Analytics & Reports</h2>
+                    <div class="header-actions" style="display:flex; gap:12px; align-items:center;">
+                        <input type="date" class="form-control" id="report-date-start"
+                            style="width:130px; padding:8px; font-size:0.85rem;" title="Start Date">
+                        <span style="color:var(--text-muted); font-size:0.85rem;">to</span>
+                        <input type="date" class="form-control" id="report-date-end"
+                            style="width:130px; padding:8px; font-size:0.85rem;" title="End Date">
+                        <select class="form-control" id="report-loc-filter"
+                            style="width:140px; padding:8px; font-size:0.85rem;">
+                            <option value="all">All Locations</option>
+                        </select>
+                        <button class="btn btn-primary" id="btn-apply-report-filters" style="padding: 8px 14px;"><i
+                                class="fa-solid fa-filter"></i> Apply</button>
+                        <button class="btn btn-outline" style="padding: 8px 14px;"><i class="fa-solid fa-download"></i>
+                            Export</button>
+                    </div>
+                </div>
+                <!-- Metrics -->
+                <div class="reports-grid">
+                    <div class="metric-card fade-in" style="animation-delay: 0.1s;">
+                        <div class="metric-icon" style="background:#e0e7ff; color:var(--primary);">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Today's Sales</span>
+                            <span class="metric-value" id="report-sales">$0.00</span>
+                        </div>
+                    </div>
+                    <div class="metric-card fade-in" style="animation-delay: 0.2s;">
+                        <div class="metric-icon" style="background:#ecfdf5; color:var(--emerald);">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Orders</span>
+                            <span class="metric-value" id="report-orders">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card fade-in" style="animation-delay: 0.3s;">
+                        <div class="metric-icon" style="background:#fef3c7; color:#d97706;">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Active Customers</span>
+                            <span class="metric-value" id="report-customers">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card fade-in" style="animation-delay: 0.4s;">
+                        <div class="metric-icon" style="background:#fce7f3; color:#db2777;">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div class="metric-info">
+                            <span class="metric-label">Top Selling Item</span>
+                            <span class="metric-value" id="report-top-item" style="font-size: 1.2rem;">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart.js Container -->
+                <div style="padding: 0 40px 40px;">
+                    <!-- Top Full Width Chart -->
+                    <div class="chart-container fade-in"
+                        style="background: white; border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-bottom: 24px; animation-delay: 0.5s;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                            <h3 style="margin:0; color:var(--text-main);">Revenue Timeline</h3>
+                            <button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.85rem;">This Week <i
+                                    class="fa-solid fa-chevron-down" style="margin-left:5px;"></i></button>
+                        </div>
+                        <canvas id="salesChart" height="80"></canvas>
+                    </div>
+
+                    <!-- Bottom Two Charts Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div class="chart-container fade-in"
+                            style="background: white; border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); animation-delay: 0.6s;">
+                            <h3 style="margin:0; margin-bottom: 20px; color:var(--text-main);">Sales by Category</h3>
+                            <div
+                                style="position: relative; height:250px; width:100%; display:flex; justify-content:center;">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container fade-in"
+                            style="background: white; border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); animation-delay: 0.7s;">
+                            <h3 style="margin:0; margin-bottom: 20px; color:var(--text-main);">Peak Hourly Traffic</h3>
+                            <div style="position: relative; height:250px; width:100%;">
+                                <canvas id="hourlyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Website -->
+            <div class="tab-content hidden" id="website-tab" style="padding: 40px;">
+                <div class="page-header">
+                    <h2>Online Store settings</h2>
+                </div>
+                <div class="settings-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+                    <div class="settings-nav"
+                        style="background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 15px;">
+                        <ul style="list-style:none; padding:0;">
+                            <li
+                                style="padding: 10px; background:var(--bg-hover); font-weight:600; border-radius:8px; margin-bottom:5px;">
+                                General</li>
+                            <li style="padding: 10px; color:var(--text-muted);">Theme Editor</li>
+                            <li style="padding: 10px; color:var(--text-muted);">Domain Settings</li>
+                        </ul>
+                    </div>
+                    <div class="settings-panel"
+                        style="background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 30px;">
+                        <div
+                            style="display: flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
+                            <div>
+                                <h3 style="margin-bottom: 5px;">Sync POS with Online Store</h3>
+                                <p style="font-size: 0.9rem; color: var(--text-muted);">Automatically update stock
+                                    levels on your Website when an item sells in-store.</p>
+                            </div>
+                            <button class="btn btn-emerald">Sync Active <i class="fa-solid fa-check"></i></button>
+                        </div>
+                        <div class="form-group">
+                            <label>Store Announcement Banner Text</label>
+                            <input type="text" class="form-control"
+                                value="Welcome to RTOSmart - Huge Holiday Sales Inside!">
+                        </div>
+                        <button class="btn btn-primary mt-4" style="margin-top: 20px;">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder Tab for unknown sections -->
+            <div class="tab-content hidden" id="placeholder-tab">
+                <div class="placeholder-content">
+                    <div class="spinner-wrapper">
+                        <i class="fa-solid fa-cube fa-beat-fade"></i>
+                    </div>
+                    <h2>Module Under Configuration</h2>
+                    <p>This section is currently being enabled for your RTOSmart POS account.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Location Modal -->
+    <div id="add-location-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <!-- (existing location modal) -->
+            <div class="modal-header">
+                <h3>Add New Location</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Store Name</label>
+                    <input type="text" id="new-loc-name" placeholder="e.g. Downtown Store" class="form-control">
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Address</label>
+                    <input type="text" id="new-loc-address" placeholder="e.g. 123 Main St" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-location-btn">Save Location</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <!-- Add Product Modal (Massive Smart RTO Form) -->
+    <div id="add-product-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Add Product (Legacy Product View)</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-tabs">
+                <div class="modal-tab active" data-tab="prod-details">Details</div>
+                <div class="modal-tab" data-tab="prod-images">Images</div>
+                <div class="modal-tab" data-tab="prod-desc">Descriptions</div>
+                <div class="modal-tab" data-tab="prod-advanced">Advanced</div>
+            </div>
+
+            <!-- Tab 1: Details -->
+            <div class="modal-tab-content active" id="prod-details" style="background:#fff;">
+                <div class="modal-form-grid">
+                    <div class="form-group full-width">
+                        <label>Product Title</label>
+                        <input type="text" id="new-prod-name" class="form-control" placeholder="Enter Product Name">
+                    </div>
+                </div>
+
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label>SKU</label>
+                        <input type="text" id="new-prod-sku" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>UPC</label>
+                        <input type="text" id="new-prod-upc" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Manufacturer Number (MRF ID)</label>
+                        <input type="text" id="new-prod-mrf" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Alternate Lookup(s)</label>
+                        <input type="text" id="new-prod-alt" class="form-control">
+                    </div>
+                </div>
+
+                <h4 style="margin:20px 0 10px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    Categorization</h4>
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="new-prod-category" class="form-control">
+                            <option>Electronics</option>
+                            <option>Furniture</option>
+                            <option>Accessories</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Manufacturer</label>
+                        <input type="text" id="new-prod-manufacturer" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Make</label>
+                        <input type="text" id="new-prod-make" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input type="text" id="new-prod-model" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="text" id="new-prod-year" class="form-control">
+                    </div>
+                </div>
+
+                <h4 style="margin:20px 0 10px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    Inventory & Purchasing</h4>
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label>Initial Stock (Inventory)</label>
+                        <input type="number" id="new-prod-stock" class="form-control" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Reorder Point</label>
+                        <input type="number" id="new-prod-reorder" class="form-control" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Desired Stock Level</label>
+                        <input type="number" id="new-prod-desired" class="form-control" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Default Cost ($)</label>
+                        <input type="number" id="new-prod-cost" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Retail Price ($)</label>
+                        <input type="number" id="new-prod-price" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Price - Sale ($)</label>
+                        <input type="number" id="new-prod-sale" class="form-control" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Images -->
+            <div class="modal-tab-content" id="prod-images" style="background:#fff;">
+                <div class="form-group full-width"
+                    style="text-align:center; padding: 40px; border:2px dashed #ccc; border-radius:8px; margin-bottom:20px;">
+                    <i class="fa-solid fa-cloud-arrow-up"
+                        style="font-size:3rem; color:var(--primary-light); margin-bottom:15px;"></i>
+                    <p>Select from server, computer, or upload from camera.</p>
+                    <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+                        <button class="btn btn-outline"><i class="fa-solid fa-server"></i> Server</button>
+                        <button class="btn btn-outline" id="btn-upload-computer"><i class="fa-solid fa-desktop"></i>
+                            Computer</button>
+                        <button class="btn btn-outline"><i class="fa-solid fa-camera"></i> Camera</button>
+                        <input type="file" id="prod-image-upload" accept="image/*" class="hidden">
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Or provide Image URL directly</label>
+                    <input type="text" id="new-prod-icon" class="form-control"
+                        placeholder="https://example.com/image.png">
+                </div>
+            </div>
+
+            <!-- Tab 3: Descriptions -->
+            <div class="modal-tab-content" id="prod-desc" style="background:#fff;">
+                <div class="form-group full-width" style="margin-bottom:15px;">
+                    <label>Short Description (144 characters remaining)</label>
+                    <textarea id="new-prod-short-desc" class="form-control" rows="2" maxlength="144"></textarea>
+                </div>
+                <div class="form-group full-width" style="margin-bottom:15px;">
+                    <label>Long Description</label>
+                    <div
+                        style="border:1px solid #ccc; padding:5px; background:#f8fafc; border-radius:4px 4px 0 0; display:flex; gap:10px;">
+                        <i class="fa-solid fa-bold" style="cursor:pointer;"></i>
+                        <i class="fa-solid fa-italic" style="cursor:pointer;"></i>
+                        <i class="fa-solid fa-underline" style="cursor:pointer;"></i>
+                        <span style="border-left:1px solid #ccc; padding-left:10px; font-size:0.8rem;">Formats | Font
+                            Family | Font Sizes</span>
+                    </div>
+                    <textarea id="new-prod-long-desc" class="form-control"
+                        style="border-radius:0 0 4px 4px; border-top:none;" rows="6"></textarea>
+                </div>
+                <div class="form-group full-width" style="margin-bottom:15px;">
+                    <label>Brief Description Below Add-to-Cart Button</label>
+                    <textarea id="new-prod-brief-desc" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+
+            <!-- Tab 4: Advanced -->
+            <div class="modal-tab-content" id="prod-advanced" style="background:#fff;">
+                <h4 style="margin:0 0 10px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">Web
+                    Capabilities</h4>
+                <div class="modal-form-grid">
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="new-prod-show-price" checked style="width:18px; height:18px;">
+                        <label style="margin:0;">Show Price on Website</label>
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="new-prod-show-cart" checked style="width:18px; height:18px;">
+                        <label style="margin:0;">Show "Add to Cart" Button</label>
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="new-prod-unlimited" style="width:18px; height:18px;">
+                        <label style="margin:0;">Unlimited Web Inventory</label>
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="new-prod-track-serial" style="width:18px; height:18px;">
+                        <label style="margin:0;">Track Serial Numbers</label>
+                    </div>
+                </div>
+
+                <h4 style="margin:20px 0 10px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    Dimensions</h4>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:20px;">
+                    <div class="form-group">
+                        <label>Weight</label>
+                        <input type="number" id="new-prod-weight" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Height</label>
+                        <input type="number" id="new-prod-height" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Width</label>
+                        <input type="number" id="new-prod-width" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Length</label>
+                        <input type="number" id="new-prod-length" class="form-control" step="0.01">
+                    </div>
+                </div>
+
+                <h4 style="margin:20px 0 10px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">
+                    Financials & Options</h4>
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label>Unit Type</label>
+                        <select id="new-prod-unit" class="form-control">
+                            <option>each</option>
+                            <option>box</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tax Code Beta</label>
+                        <input type="text" id="new-prod-taxcode" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Cost Depreciation Schedule</label>
+                        <select id="new-prod-depreciation" class="form-control">
+                            <option>None</option>
+                            <option>Straight Line</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:10px;"><input type="checkbox"
+                                id="new-prod-kit"><label style="margin:0;">Is a Kit</label></div>
+                        <div style="display:flex; align-items:center; gap:10px;"><input type="checkbox"
+                                id="new-prod-commission" checked><label style="margin:0;">Commissionable</label></div>
+                        <div style="display:flex; align-items:center; gap:10px;"><input type="checkbox"
+                                id="new-prod-digital"><label style="margin:0;">Digital Download</label></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-product-btn">Add Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal is REMOVED intentionally as we use the Add Product Modal -->
+
+    <!-- Add Customer Modal (Massive Smart RTO Form) -->
+    <div id="add-customer-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Add Customer</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-tabs">
+                <div class="modal-tab active" data-tab="cust-contact">Contact Info</div>
+                <div class="modal-tab" data-tab="cust-billing">Billing Address</div>
+                <div class="modal-tab" data-tab="cust-settings">Settings</div>
+            </div>
+
+            <div class="modal-body" style="max-height: 60vh; overflow-y:auto; padding-top:0;">
+
+                <!-- Tab 1: Contact Info -->
+                <div class="modal-tab-content active" id="cust-contact" style="background:#fff; padding-top:20px;">
+                    <div class="modal-form-grid">
+                        <div class="form-group full-width">
+                            <label>Company Name</label>
+                            <input type="text" id="new-cust-company" class="form-control"
+                                placeholder="Company Name (Optional)">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Full Name</label>
+                            <input type="text" id="new-cust-name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="new-cust-email" class="form-control">
+                        </div>
+                        <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                            <input type="checkbox" id="new-cust-wants-news" style="width:18px;height:18px;">
+                            <label style="margin:0;">Wants Newsletter</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Primary Phone</label>
+                            <input type="text" id="new-cust-phone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Extension</label>
+                            <input type="text" id="new-cust-ext" class="form-control" placeholder="Ext.">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Other Phone</label>
+                            <input type="text" id="new-cust-other-phone" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Billing Address -->
+                <div class="modal-tab-content" id="cust-billing" style="background:#fff; padding-top:20px;">
+                    <div class="modal-form-grid">
+                        <div class="form-group full-width">
+                            <label>Street Address</label>
+                            <input type="text" id="new-cust-street" class="form-control">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Address 2</label>
+                            <input type="text" id="new-cust-address2" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" id="new-cust-city" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>State / Province</label>
+                            <input type="text" id="new-cust-state" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>ZIP / Postal Code</label>
+                            <input type="text" id="new-cust-zip" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Country</label>
+                            <select id="new-cust-country" class="form-control">
+                                <option>United States</option>
+                                <option>Canada</option>
+                                <option>United Kingdom</option>
+                                <option>Pakistan</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Settings -->
+                <div class="modal-tab-content" id="cust-settings" style="background:#fff; padding-top:20px;">
+                    <div class="modal-form-grid">
+                        <div class="form-group">
+                            <label>Group</label>
+                            <select id="new-cust-group" class="form-control">
+                                <option>Retail</option>
+                                <option>Wholesale</option>
+                                <option>VIP</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Driver's License / ID Number</label>
+                            <input type="text" id="new-cust-dl" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Birthday</label>
+                            <input type="date" id="new-cust-birthday" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Anniversary</label>
+                            <input type="date" id="new-cust-anniversary" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="new-cust-gender" class="form-control">
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Other</option>
+                                <option>Prefer not to say</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Language</label>
+                            <select id="new-cust-language" class="form-control">
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                                <option>Urdu</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Primary Location</label>
+                            <select id="new-cust-primary-loc" class="form-control">
+                                <option value="1">RTOSmart POS</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-customer-btn">Save Customer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vendor Sub-Modal -->
+    <div id="add-vendor-modal" class="modal-overlay hidden" style="z-index: 2000;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Add New Vendor</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-form-grid">
+                    <div class="form-group full-width">
+                        <label>Vendor Name</label>
+                        <input type="text" id="new-vend-name" class="form-control" placeholder="Company Name">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Contact Info (Email/Phone)</label>
+                        <input type="text" id="new-vend-contact" class="form-control" placeholder="Point of Contact">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:15px; margin-top: 15px;">
+                    <label>Company Address</label>
+                    <textarea id="new-vend-address" class="form-control" rows="2"
+                        placeholder="Full HQ address"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Additional Notes</label>
+                    <textarea id="new-vend-notes" class="form-control" rows="2"
+                        placeholder="Terms, Net-30 info, etc."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-vendor-btn">Save Vendor</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create PO Modal (Expanded) -->
+    <div id="add-po-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Create Purchase Order</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-form-grid">
+                    <div class="form-group full-width">
+                        <label>Select Vendor</label>
+                        <select id="new-po-vendor" class="form-control">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label>Ship To Location</label>
+                        <select id="new-po-ship-to" class="form-control">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>PO Number (Auto/Custom)</label>
+                        <input type="text" id="new-po-number" class="form-control"
+                            placeholder="Leave blank to auto-generate">
+                    </div>
+                </div>
+                <div class="modal-form-grid">
+                    <div class="form-group">
+                        <label>Ship Date</label>
+                        <input type="date" id="new-po-ship-date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Cancel Date</label>
+                        <input type="date" id="new-po-cancel-date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Tracking Number</label>
+                        <input type="text" id="new-po-tracking" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Expected Delivery</label>
+                        <input type="date" id="new-po-expected" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-form-grid"
+                    style="border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px;">
+                    <div class="form-group">
+                        <label>Freight / Shipping Cost ($)</label>
+                        <input type="number" id="new-po-freight" class="form-control" step="0.01" value="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Discount Amount ($)</label>
+                        <input type="number" id="new-po-discount" class="form-control" step="0.01" value="0.00">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>PO Subtotal Value ($)</label>
+                        <input type="number" id="new-po-total" class="form-control" step="0.01"
+                            style="font-size: 1.1rem; font-weight: 600; color: var(--primary);">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>PO Notes / Internal Reference</label>
+                    <textarea id="new-po-notes" class="form-control" rows="2"
+                        placeholder="Item list, special instructions..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-po-btn">Submit Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Work Order Modal (Complex Dual Pane Layout) -->
+    <div id="add-wo-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>Create New Work Order</h3>
+                <button class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="modal-body" style="padding:0; display:flex; max-height: 70vh;">
+                <!-- Left Pane: Base Details -->
+                <div style="flex:1; padding:24px; border-right:1px solid var(--border-color); overflow-y:auto;">
+                    <h4 style="margin:0 0 15px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">
+                        Workflow</h4>
+                    <div class="modal-form-grid">
+                        <div class="form-group full-width">
+                            <label>Customer ID (Temporary Simple Input)</label>
+                            <input type="text" id="wo-cust-id" class="form-control" placeholder="Enter Customer ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="wo-status" class="form-control">
+                                <option>Awaiting Deposit</option>
+                                <option>In Progress</option>
+                                <option>Pending Parts</option>
+                                <option>Ready for Pickup</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date / Expected</label>
+                            <input type="date" id="wo-due" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Bin/Location ID</label>
+                            <input type="text" id="wo-bin" class="form-control" placeholder="Back Room A">
+                        </div>
+                        <div class="form-group">
+                            <label>Loaner Included</label>
+                            <input type="text" id="wo-loaner" class="form-control" placeholder="Loaner Item ID">
+                        </div>
+                    </div>
+
+                    <h4 style="margin:20px 0 15px; font-size:1rem; border-bottom:1px solid #eee; padding-bottom:5px;">
+                        Item Details</h4>
+                    <div class="modal-form-grid">
+                        <div class="form-group full-width">
+                            <label>Description of Item</label>
+                            <input type="text" id="wo-desc" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Make</label>
+                            <input type="text" id="wo-make" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Model</label>
+                            <input type="text" id="wo-model" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Serial Number</label>
+                            <input type="text" id="wo-serial" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>UPC</label>
+                            <input type="text" id="wo-upc" class="form-control">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Accessories Included</label>
+                            <textarea id="wo-accessories" class="form-control" rows="2"
+                                placeholder="Power cable, case, etc..."></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Internal Comments</label>
+                            <textarea id="wo-internal-comments" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Receipt Comments (Visible to Customer)</label>
+                            <textarea id="wo-receipt-comments" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Pane: Jobs and Materials -->
+                <div style="flex:1; padding:24px; background:#f8fafc; overflow-y:auto;">
+                    <h4 style="margin:0 0 15px; font-size:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">
+                        Assigned Jobs</h4>
+
+                    <div id="wo-jobs-container"
+                        style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+                        <!-- dynamic jobs -->
+                        <div
+                            style="background:white; padding:15px; border-radius:6px; border:1px solid var(--border-color);">
+                            <div class="form-group mb-3">
+                                <label>Job Title</label>
+                                <input type="text" class="form-control wo-job-title" value="Standard Diagnostic">
+                            </div>
+                            <div class="modal-form-grid">
+                                <div class="form-group">
+                                    <label>Technician</label>
+                                    <select class="form-control wo-job-tech">
+                                        <option>Unassigned</option>
+                                        <option>John Doe</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tag/Type</label>
+                                    <select class="form-control wo-job-tag">
+                                        <option>Hardware</option>
+                                        <option>Software</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline btn-full mb-3" id="add-wo-job-btn"><i class="fa-solid fa-plus"></i>
+                        Add Another Job</button>
+
+                    <h4
+                        style="margin:20px 0 15px; font-size:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:5px;">
+                        Materials & Services</h4>
+
+                    <div id="wo-items-container"
+                        style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
+                        <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; align-items:end;">
+                            <div class="form-group"><label>Description</label><input type="text"
+                                    class="form-control wo-item-desc" placeholder="Part Name"></div>
+                            <div class="form-group"><label>Price</label><input type="number"
+                                    class="form-control wo-item-price" value="0.00" step="0.01"></div>
+                            <div class="form-group"><label>Type</label><select class="form-control wo-item-type">
+                                    <option>Material</option>
+                                    <option>Service</option>
+                                </select></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline btn-full mb-3" id="add-wo-item-btn"><i class="fa-solid fa-plus"></i>
+                        Add Item/Line</button>
+
+                    <div class="form-group" style="margin-top:20px; padding-top:15px; border-top:1px dashed #cbd5e1;">
+                        <label>Deposit Amount Collected ($)</label>
+                        <input type="number" id="wo-deposit" class="form-control" value="0.00" step="0.01"
+                            style="font-size:1.2rem; font-weight:bold;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline close-modal">Cancel</button>
+                <button class="btn btn-primary" id="save-wo-btn">Create Work Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
