@@ -519,9 +519,10 @@ document.addEventListener('DOMContentLoaded', () => {
             is_kit: document.getElementById('new-prod-kit').checked,
             commissionable: document.getElementById('new-prod-commission').checked,
             is_digital: document.getElementById('new-prod-digital').checked,
-            location_id: state.currentLocation.id
+            location_id: state.currentLocation ? state.currentLocation.id : null
         };
 
+        if (!payload.location_id) return alert("You must create or select a Store Location first before adding products!");
         if (!payload.sku || !payload.name || !payload.price) return alert("Please fill at least the Product Title, SKU, and Price in the Details tab.");
 
         const isEdit = addProductModal.dataset.mode === 'edit';
