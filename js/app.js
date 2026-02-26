@@ -175,6 +175,36 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', () => switchTab(link.getAttribute('data-tab')));
     });
 
+    // --- Reports Logic ---
+    async function fetchReports() {
+        try {
+            const [ordersRes, customersRes] = await Promise.all([
+                fetch('/api/orders'),
+                fetch('/api/customers')
+            ]);
+            const orders = await ordersRes.json();
+            const customers = await customersRes.json();
+
+            // Calculate Today's Sales
+            const today = new Date().toISOString().split('T')[0];
+            const todayOrders = orders.filter(o => o.date.startsWith(today));
+            const todaySales = todayOrders.reduce((sum, o) => sum + o.total, 0);
+
+            // Calculate active customers
+            document.getElementById('report-sales').textContent = '$' + todaySales.toFixed(2);
+            document.getElementById('report-orders').textContent = orders.length;
+            document.getElementById('report-customers').textContent = customers.length;
+            document.getElementById('report-top-item').textContent = "Pending";
+
+            // Safely initialize charts if Chart is available
+            if (typeof Chart !== 'undefined') {
+                // Dummy charts to prevent blank layout
+            }
+        } catch (e) {
+            console.error("Failed fetching reports:", e);
+        }
+    }
+
     // --- Register / Products Logic ---
     const productsGrid = document.getElementById('products-grid');
 
@@ -269,13 +299,21 @@ document.addEventListener('DOMContentLoaded', () => {
             state.cart.forEach(item => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'cart-item';
+
+                const iconHtml = item.icon && (item.icon.startsWith('http') || item.icon.startsWith('data:'))
+                    ? `<img src="${item.icon}" style="width:40px; height:40px; object-fit:contain; border-radius:4px; margin-right:10px;" alt="Product">`
+                    : `<div style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:#eee; border-radius:4px; margin-right:10px;"><i class="fa-solid ${item.icon || 'fa-box'}" style="color:#888;"></i></div>`;
+
                 itemEl.innerHTML = `
-                    <div class="cart-item-details">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-controls">
-                            <button class="qty-btn minus" data-id="${item.id}"><i class="fa-solid fa-minus"></i></button>
-                            <span class="qty-val">${item.qty}</span>
-                            <button class="qty-btn plus" data-id="${item.id}"><i class="fa-solid fa-plus"></i></button>
+                    <div style="display:flex; align-items:center;">
+                        ${iconHtml}
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-controls">
+                                <button class="qty-btn minus" data-id="${item.id}"><i class="fa-solid fa-minus"></i></button>
+                                <span class="qty-val">${item.qty}</span>
+                                <button class="qty-btn plus" data-id="${item.id}"><i class="fa-solid fa-plus"></i></button>
+                            </div>
                         </div>
                     </div>
                     <div class="cart-item-price">
@@ -523,7 +561,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (!payload.location_id) return alert("You must create or select a Store Location first before adding products!");
-        if (!payload.sku || !payload.name || !payload.price) return alert("Please fill at least the Product Title, SKU, and Price in the Details tab.");
+        if (!payload.sku || !payload.name || payload.price === null || isNaN(payload.price)) {
+            return alert("Please fill at least the Product Title, SKU, and Price in the Details tab.");
+        }
 
         const isEdit = addProductModal.dataset.mode === 'edit';
         const method = isEdit ? 'PUT' : 'POST';
@@ -557,7 +597,13 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = '';
         products.forEach(p => {
             const tr = document.createElement('tr');
+
+            const iconHtml = p.icon && (p.icon.startsWith('http') || p.icon.startsWith('data:'))
+                ? `<img src="${p.icon}" style="width:30px; height:30px; object-fit:contain; border-radius:4px;" alt="Icon">`
+                : `<i class="fa-solid ${p.icon || 'fa-box'}" style="color:#888;"></i>`;
+
             tr.innerHTML = `
+                <td>${iconHtml}</td>
                 <td><span class="badge" style="background:#f1f5f9; color:#475569">${p.sku}</span></td>
                 <td style="font-weight:600;">${p.name}</td>
                 <td>${p.category}</td>
