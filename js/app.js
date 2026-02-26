@@ -660,30 +660,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveCustomerBtn.addEventListener('click', async () => {
         const name = document.getElementById('new-cust-name').value;
-        const contact = document.getElementById('new-cust-contact').value;
+        const email = document.getElementById('new-cust-email').value;
+        const phone = document.getElementById('new-cust-phone').value;
         const group_type = document.getElementById('new-cust-group').value;
 
         if (!name) return alert("Name is required");
 
+        const payload = {
+            name, email, phone, group_type,
+            company: document.getElementById('new-cust-company').value,
+            wants_news: document.getElementById('new-cust-wants-news').checked,
+            phone_ext: document.getElementById('new-cust-ext').value,
+            other_phone: document.getElementById('new-cust-other-phone').value,
+            street: document.getElementById('new-cust-street').value,
+            address2: document.getElementById('new-cust-address2').value,
+            city: document.getElementById('new-cust-city').value,
+            state: document.getElementById('new-cust-state').value,
+            zip: document.getElementById('new-cust-zip').value,
+            country: document.getElementById('new-cust-country').value,
+            driver_license: document.getElementById('new-cust-dl').value,
+            birthday: document.getElementById('new-cust-birthday').value,
+            anniversary: document.getElementById('new-cust-anniversary').value,
+            gender: document.getElementById('new-cust-gender').value,
+            language: document.getElementById('new-cust-language').value,
+            primary_location: document.getElementById('new-cust-primary-loc').value
+        };
+
         const res = await fetch('/api/customers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                phone: contact,
-                email: contact.includes('@') ? contact : '',
-                group_type
-            })
+            body: JSON.stringify(payload)
         });
 
         if (res.ok) {
             addCustomerModal.classList.add('hidden');
             fetchCustomers();
+
+            // Clear fields (basic)
             document.getElementById('new-cust-name').value = '';
-            document.getElementById('new-cust-contact').value = '';
+            document.getElementById('new-cust-email').value = '';
+            document.getElementById('new-cust-phone').value = '';
         } else {
-            const errData = await res.json().catch(() => ({}));
-            alert("Failed to save customer: " + (errData.error || res.statusText));
+            const err = await res.json();
+            alert("Error saving customer: " + err.error);
         }
     });
 
