@@ -612,9 +612,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <span class="badge ${p.stock < 10 ? 'badge-warning' : 'badge-success'}">${p.stock} Units</span>
                 </td>
-                <td><button class="icon-btn-small edit-item-btn" data-fullprod='${JSON.stringify(p).replace(/'/g, "&apos;")}'> <i class="fa-solid fa-pen"></i></button></td>
+                <td>
+                    <button class="icon-btn-small edit-item-btn" data-fullprod='${JSON.stringify(p).replace(/'/g, "&apos;")}' title="Edit"> <i class="fa-solid fa-pen"></i></button>
+                    <button class="icon-btn-small delete-item-btn" data-id="${p.id}" style="color: #ef4444; margin-left: 8px;" title="Delete"> <i class="fa-solid fa-trash"></i></button>
+                </td>
             `;
             tbody.appendChild(tr);
+        });
+
+        // Bind Delete buttons
+        document.querySelectorAll('.delete-item-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.dataset.id;
+                if (confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+                    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        fetchInventory();
+                        fetchProductsForCurrentLocation();
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        alert("Failed to delete product: " + (err.error || res.statusText));
+                    }
+                }
+            });
         });
 
         // Bind Edit buttons

@@ -124,6 +124,13 @@ app.put('/api/products/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.delete('/api/products/:id', async (req, res) => {
+    try {
+        await pool.query("DELETE FROM products WHERE id = $1", [req.params.id]);
+        res.json({ message: "Product deleted successfully" });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // 3. Orders
 app.post('/api/orders', async (req, res) => {
     const { location_id, customer_id, subtotal, tax, total, status, items } = req.body;
