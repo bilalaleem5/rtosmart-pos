@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 800);
 
             renderCart();
+            updateLowStockAlerts();
 
         } catch (error) {
             console.error("Failed to initialize app:", error);
@@ -144,8 +145,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Re-fetch products (will be empty for new location)
             await fetchProductsForCurrentLocation();
+            updateLowStockAlerts();
         }
     });
+
+    // --- Notifications & Low Stock Alerts ---
+    const notificationsBtn = document.getElementById('notifications-btn');
+    const notificationsModal = document.getElementById('notifications-modal');
+
+    if (notificationsBtn && notificationsModal) {
+        notificationsBtn.addEventListener('click', () => {
+            notificationsModal.classList.remove('hidden');
+            updateLowStockAlerts();
+        });
+    }
+
+    async function updateLowStockAlerts() {
+        try {
+            const res = await fetch('/api/products');
+            const products = await res.json();
+
+            // Reorder point logic: filter out items strictly below or equal to reorder_point threshold
+            const lowStockProducts = products.filter(p => p.stock <= (p.reorder_point || 0));
+
+            const badge = document.getElementById('low-stock-badge');
+            const tbody = document.getElementById('low-stock-table-body');
+
+            if (!badge || !tbody) return;
+
+            if (lowStockProducts.length > 0) {
+                badge.style.display = 'block';
+                badge.textContent = lowStockProducts.length;
+
+                tbody.innerHTML = '';
+                lowStockProducts.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <strong>${p.name}</strong><br>
+                                <span style="font-size: 0.8rem; color: #64748b;">SKU: ${p.sku}</span>
+                            </td>
+                            <td style="color: #ef4444; font-weight: bold;">${p.stock}</td>
+                            <td>${p.reorder_point || 0}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                badge.style.display = 'none';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="empty-state">
+                            <p>No low stock alerts.</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        } catch (e) {
+            console.error("Failed to fetch low stock alerts", e);
+        }
+    }
 
     // --- Tab Switching Logic ---
     function switchTab(targetTab) {
@@ -443,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('cart-customer-contact').value = '';
             renderCart();
             fetchProductsForCurrentLocation();
+            updateLowStockAlerts();
         } else {
             alert('Error completing order.');
         }
@@ -579,6 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addProductModal.classList.add('hidden');
             fetchInventory();
             fetchProductsForCurrentLocation();
+            updateLowStockAlerts();
         } else {
             const errData = await res.json().catch(() => ({}));
             let errMsg = errData.error || res.statusText;
@@ -629,6 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (res.ok) {
                         fetchInventory();
                         fetchProductsForCurrentLocation();
+                        updateLowStockAlerts();
                     } else {
                         const err = await res.json().catch(() => ({}));
                         alert("Failed to delete product: " + (err.error || res.statusText));
